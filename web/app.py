@@ -277,6 +277,13 @@ background:#0a0a0a;color:#e4e4e7;border:1px solid #3f3f46;border-radius:12px;pad
 .notes{color:#a1a1aa;font-size:14px;margin:12px 0 28px}
 .foot{color:#71717a;font-size:13px;margin:24px 0}
 .foot a{color:#71717a}
+.by{position:fixed;right:16px;bottom:16px;z-index:10;display:inline-flex;align-items:center;gap:6px;
+padding:8px 14px;border-radius:999px;background:rgba(24,24,27,.85);border:1px solid #c084fc;color:#e9d5ff;
+font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.5);
+-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.by:hover{background:rgba(147,51,234,.25)}
+.by i{width:8px;height:8px;border-radius:50%;background:#c084fc}
+body{padding-bottom:72px}
 .big{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.5px;color:#fafafa;margin:4px 0 2px}
 .hero{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px}
 .sec{margin:28px 0 10px;font-size:19px;font-weight:700}
@@ -320,7 +327,8 @@ def page(title, body, index=False, refresh=None, desc=None):
     head.append("<style>%s</style></head><body><main>" % CSS)
     foot = ('<div class=foot>문의 <a href="mailto:%s">%s</a><br>sitecheck %s · <a href="%s" rel="noopener">소스 코드</a></div>'
             % (CONTACT, CONTACT, sc.VERSION, sc.HOME))
-    return "".join(head) + body + foot + "<script>%s</script></main></body></html>" % COPY_JS
+    by = '<a class=by href="https://etfindex.co.kr/" rel="noopener"><i></i>ETFindex.co.kr 제공</a>'
+    return "".join(head) + body + foot + by + "<script>%s</script></main></body></html>" % COPY_JS
 
 
 # 첫 화면 그림 — 인라인 SVG 라 외부 파일·CSP 예외가 필요 없다. 보라 선 그림으로 통일한다.
