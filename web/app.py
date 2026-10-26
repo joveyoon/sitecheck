@@ -225,54 +225,54 @@ def allow_new(ip, url):
 
 e = html.escape
 
-# etfindex.co.kr 다크 테마 — slate 바탕, 반투명 카드, 보라 강조 (Tailwind slate·purple 값)
+# 검은 바탕 테마 — 무채색 카드, etfindex.co.kr 의 보라 강조
 CSS = """
 :root{color-scheme:dark}
 body{font-family:Inter,Pretendard,"Apple SD Gothic Neo","Malgun Gothic",-apple-system,"Segoe UI",sans-serif;
-background:#020817;background-image:linear-gradient(135deg,#0f172a,#1e293b 50%,#0f172a);background-attachment:fixed;
-color:#f8fafc;margin:0;padding:24px 16px;line-height:1.6}
+background:#000;
+color:#fafafa;margin:0;padding:24px 16px;line-height:1.6}
 main{max-width:760px;margin:0 auto}
 a{color:#c084fc}
 h1{font-size:24px;font-weight:800;margin:0 0 6px}
 .grad{background:linear-gradient(90deg,#c084fc,#a78bfa,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
-.meta{color:#94a3b8;font-size:14px;margin-bottom:16px;word-break:break-all}
-.lead{font-size:15px;color:#94a3b8;margin:0 0 2px}
-.head,.item,.box{background:rgba(30,41,59,.45);border:1px solid #1e293b;border-radius:16px;padding:16px;margin-bottom:10px}
+.meta{color:#a1a1aa;font-size:14px;margin-bottom:16px;word-break:break-all}
+.lead{font-size:15px;color:#a1a1aa;margin:0 0 2px}
+.head,.item,.box{background:#0f0f0f;border:1px solid #262626;border-radius:16px;padding:16px;margin-bottom:10px}
 .head{font-size:17px;font-weight:700}
-.head small{display:block;font-weight:400;color:#94a3b8;font-size:14px}
+.head small{display:block;font-weight:400;color:#a1a1aa;font-size:14px}
 .item h3{font-size:16px;font-weight:600;margin:0 0 6px}
-.item p{margin:0;color:#cbd5e1}
-.ask{margin-top:8px!important;font-weight:600;color:#f8fafc!important}
-.det{margin:8px 0 0;padding-left:18px;color:#94a3b8;font-size:13px;word-break:break-all}
+.item p{margin:0;color:#d4d4d8}
+.ask{margin-top:8px!important;font-weight:600;color:#fafafa!important}
+.det{margin:8px 0 0;padding-left:18px;color:#a1a1aa;font-size:13px;word-break:break-all}
 .lv{display:inline-block;font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;margin-right:8px;border:1px solid}
 .lv-위험{color:#f87171;border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.12)}
 .lv-주의{color:#fb923c;border-color:rgba(251,146,60,.5);background:rgba(251,146,60,.12)}
-.lv-확인{color:#94a3b8;border-color:#334155;background:rgba(148,163,184,.1)}
+.lv-확인{color:#a1a1aa;border-color:#3f3f46;background:rgba(161,161,170,.1)}
 .lv-문제없음{color:#4ade80;border-color:rgba(74,222,128,.45);background:rgba(74,222,128,.1)}
 .box h2{font-size:17px;font-weight:700;margin:0 0 8px}
-.box ol,.box ul{margin:0;padding-left:20px;color:#cbd5e1}
-.box .note{margin-top:8px;color:#94a3b8;font-size:14px}
+.box ol,.box ul{margin:0;padding-left:20px;color:#d4d4d8}
+.box .note{margin-top:8px;color:#a1a1aa;font-size:14px}
 .fixed{border-color:rgba(74,222,128,.45);background:rgba(74,222,128,.08)}
 .fixed h2{color:#4ade80}
 .err{border-color:rgba(248,113,113,.5);background:rgba(248,113,113,.1);color:#fca5a5}
 form.check{display:flex;gap:8px;margin-top:18px}
-input[type=text],.row input{flex:1;min-width:0;font-size:16px;padding:12px 14px;border:1px solid #4b5563;border-radius:8px;
-background:rgba(30,41,59,.8);color:#f8fafc}
+input[type=text],.row input{flex:1;min-width:0;font-size:16px;padding:12px 14px;border:1px solid #3f3f46;border-radius:8px;
+background:#171717;color:#fafafa}
 input:focus,textarea:focus{outline:none;border-color:#c084fc}
-input::placeholder{color:#64748b}
+input::placeholder{color:#71717a}
 button{font-size:16px;padding:12px 18px;border:0;border-radius:8px;background:#9333ea;color:#fff;font-weight:600;cursor:pointer;white-space:nowrap}
 button:hover{background:#a855f7}
-button.sub{background:rgba(30,41,59,.5);border:1px solid #c084fc;color:#c084fc}
+button.sub{background:transparent;border:1px solid #c084fc;color:#c084fc}
 button.sub:hover{background:rgba(192,132,252,.12)}
-.agree{margin:10px 0 0;font-size:13px;color:#94a3b8}
+.agree{margin:10px 0 0;font-size:13px;color:#a1a1aa}
 .row{display:flex;gap:8px;margin-top:8px;align-items:center}
 .row input{font-size:14px;padding:10px}
 textarea{width:100%;box-sizing:border-box;min-height:240px;font:13px/1.6 ui-monospace,Consolas,monospace;
-background:rgba(15,23,42,.8);color:#e2e8f0;border:1px solid #334155;border-radius:12px;padding:12px}
-.hist{font-size:14px;color:#94a3b8}
-.notes{color:#94a3b8;font-size:14px;margin:12px 0 28px}
-.foot{color:#64748b;font-size:13px;margin:24px 0}
-.foot a{color:#64748b}
+background:#0a0a0a;color:#e4e4e7;border:1px solid #3f3f46;border-radius:12px;padding:12px}
+.hist{font-size:14px;color:#a1a1aa}
+.notes{color:#a1a1aa;font-size:14px;margin:12px 0 28px}
+.foot{color:#71717a;font-size:13px;margin:24px 0}
+.foot a{color:#71717a}
 """
 
 COPY_JS = """
