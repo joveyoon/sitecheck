@@ -379,9 +379,7 @@ def home_page(error=None, url=""):
              'autocomplete=url inputmode=url aria-label="사이트 주소">'
              "<button>점검하기</button></form>" % (PREFIX, e(url)))
     b.append("<p class=agree>본인이 운영하거나 관리를 맡은 홈페이지만 점검해 주십시오.</p>")
-    b.append("<div class=box style='margin-top:24px'><h2>점검 항목</h2><ol class=checks>%s</ol>"
-             "<p class=note>서버 안쪽(PHP·Node.js 버전, 홈페이지를 만들 때 쓴 부품의 보안 문제)은 밖에서 보이지 않습니다.<br>"
-             "그래서 결과의 요청문에 업체가 서버에서 돌릴 점검 명령을 함께 넣어 드립니다.</p></div>"
+    b.append("<div class=box style='margin-top:24px'><h2>점검 항목</h2><ol class=checks>%s</ol></div>"
              % "".join("<li><b>%s</b><span>%s</span></li>" % (t, d) for t, d in CHECKS))
     return page("PHP·Node.js 홈페이지 보안 점검 — 주소만 넣으면 됩니다 | sitecheck", "".join(b), index=True,
                 desc="PHP·Node.js·워드프레스 홈페이지의 보안 문제를 서버에 들어가지 않고 주소만으로 찾고, "
