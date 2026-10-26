@@ -368,8 +368,7 @@ CHECKS = [
 
 
 def home_page(error=None, url=""):
-    b = ["<div class=big>PHP · Node.js</div>",
-         "<h1><span class=grad>홈페이지 보안 점검</span></h1>",
+    b = ["<h1 class=big><span class=grad>사이트 보안 점검</span></h1>",
          "<h2 class=what>문제와 해결</h2>", SVG_HERO,
          "<p class=lead>사이트 보안 구멍을 점검합니다.</p>",
          "<p class=lead>홈페이지 주소만 있으면 됩니다. 서버 접속 정보나 비밀번호는 필요 없습니다.</p>",
@@ -383,7 +382,7 @@ def home_page(error=None, url=""):
     b.append("<p class=agree>본인이 운영하거나 관리를 맡은 홈페이지만 점검해 주십시오.</p>")
     b.append("<div class=box style='margin-top:24px'><h2>점검 항목</h2><ol class=checks>%s</ol></div>"
              % "".join("<li><b>%s</b><span>%s</span></li>" % (t, d) for t, d in CHECKS))
-    return page("PHP·Node.js 홈페이지 보안 점검 — 주소만 넣으면 됩니다 | sitecheck", "".join(b), index=True,
+    return page("사이트 보안 점검 — PHP·Node.js 홈페이지 | sitecheck", "".join(b), index=True,
                 desc="PHP·Node.js·워드프레스 홈페이지의 보안 문제를 서버에 들어가지 않고 주소만으로 찾고, "
                      "외주 업체에 보낼 요청문까지 만들어 드립니다. IT 지식이 없어도 쓸 수 있습니다.")
 
