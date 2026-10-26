@@ -373,7 +373,7 @@ def home_page(error=None, url=""):
          "<h2 class=what>문제와 해결</h2>", SVG_HERO,
          "<p class=lead>사이트 보안 구멍을 점검합니다.</p>",
          "<p class=lead>홈페이지 주소만 있으면 됩니다. 서버 접속 정보나 비밀번호는 필요 없습니다.</p>",
-         "<p class=lead>외주사에 패치를 요청하세요.</p>"]
+         "<p class=lead>그리고, 외주사에 패치를 요청하세요.</p>"]
     if error:
         b.append("<div class='box err'>%s</div>" % e(error))
     b.append('<form class=check method=post action="%s/check">'
