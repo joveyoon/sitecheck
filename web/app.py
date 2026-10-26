@@ -43,6 +43,9 @@ DB_PATH = os.environ.get("SITECHECK_DB", os.path.join(os.path.dirname(os.path.ab
 
 CONTACT = "help@etfindex.co.kr"
 
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "og.png"), "rb") as _f:
+    OG_PNG = _f.read()  # 공유 미리보기 그림 1200×630
+
 ONE_LINER = ("curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v%s/sitecheck.py"
              " | python3 - --server" % sc.VERSION)
 
@@ -323,6 +326,17 @@ def page(title, body, index=False, refresh=None, desc=None):
             "<title>%s</title>" % e(title)]
     if desc:
         head.append('<meta name="description" content="%s">' % e(desc))
+    # 카카오톡·SNS 에 링크를 붙이면 보이는 미리보기
+    og_desc = desc or "주소만 넣으면 보안 구멍을 찾고, 외주사에 보낼 패치 요청문까지 만들어 드립니다."
+    head += ['<meta property="og:type" content="website">',
+             '<meta property="og:site_name" content="ETFindex 사이트 보안 점검">',
+             '<meta property="og:title" content="%s">' % e(title.split(" | ")[0]),
+             '<meta property="og:description" content="%s">' % e(og_desc),
+             '<meta property="og:image" content="%s/og.png">' % PUBLIC,
+             '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">',
+             '<meta name="twitter:card" content="summary_large_image">']
+    if index:
+        head += ['<meta property="og:url" content="%s/">' % PUBLIC, '<link rel="canonical" href="%s/">' % PUBLIC]
     if not index:
         head.append('<meta name="robots" content="noindex,nofollow">')
     if refresh:
@@ -422,7 +436,7 @@ def web_letter(rep, link):
           ONE_LINER, "",
           "조치가 끝나면 아래 링크에서 「다시 점검」을 눌러 주십시오.",
           "고친 항목은 「고쳐진 항목」으로 따로 보입니다.",
-          link, "", sc.CREDIT]
+          link, "", "사이트 보안 점검 · %s/" % PUBLIC]
     return "\n".join(L)
 
 
@@ -518,7 +532,7 @@ class Handler(BaseHTTPRequestHandler):
         return peer
 
     def send(self, status, body="", ctype="text/html; charset=utf-8", headers=None):
-        data = body.encode("utf-8")
+        data = body if isinstance(body, bytes) else body.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
@@ -552,6 +566,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.send(200, home_page())
         if path == "/healthz":
             return self.send(200, "ok", "text/plain; charset=utf-8")
+        if path == "/og.png":
+            return self.send(200, OG_PNG, "image/png", {"Cache-Control": "public, max-age=86400"})
         m = re.match(r"^/r/([A-Za-z0-9_-]{8,40})$", path)
         if m:
             code = urllib.parse.parse_qs(parts.query).get("n", [""])[0]
