@@ -370,7 +370,7 @@ CHECKS = [
 def home_page(error=None, url=""):
     b = ["<div class=big>PHP · Node.js</div>",
          "<h1><span class=grad>홈페이지 보안 점검</span></h1>",
-         "<h2 class=what>외부에서 보이는 보안 취약점 점검</h2>", SVG_HERO,
+         "<h2 class=what>문제와 해결</h2>", SVG_HERO,
          "<p class=lead>사이트 보안 구멍을 점검합니다.</p>",
          "<p class=lead>홈페이지 주소만 있으면 됩니다. 서버 접속 정보나 비밀번호는 필요 없습니다.</p>",
          "<p class=lead>외주사에 패치를 요청하세요.</p>"]
