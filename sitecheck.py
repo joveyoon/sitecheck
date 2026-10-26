@@ -28,9 +28,9 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.1.3"
-UA = "sitecheck/" + VERSION
+VERSION = "0.1.4"
 HOME = "https://github.com/joveyoon/sitecheck"
+UA = "Mozilla/5.0 (compatible; sitecheck/%s; +%s)" % (VERSION, HOME)
 CREDIT = "sitecheck 로 점검했습니다 · " + HOME
 TODAY = datetime.date.today()
 
@@ -524,6 +524,14 @@ def header_findings(hd, final_url):
             suffix = m.group(2).lstrip("-+")
             out.append(judge_runtime("PHP", "php", m.group(1), 2, "응답 헤더 X-Powered-By",
                                      distro=("운영체제 패키지 " + suffix) if suffix else None))
+    node = [x for x in xpb if re.match(r"(Express|Next\.js|Nuxt|Koa|Fastify|hapi|Sails|NestJS)\b", x.strip(), re.I)]
+    if node:
+        out.append(Finding(WARN, "Node.js 서버 프로그램 이름이 밖으로 드러납니다",
+                           ["응답에 Node.js 로 만든 서버 프로그램의 이름이 적혀 나갑니다.",
+                            "공격자가 어떤 프로그램의 약점을 노릴지 고르는 데 씁니다."],
+                           "응답 헤더 X-Powered-By 를 꺼 주십시오 "
+                           "(Express: app.disable('x-powered-by'), Next.js: poweredByHeader: false).",
+                           ["X-Powered-By: " + x for x in node]))
 
     missing = []
     if final_url.startswith("https://") and not hd.get("Strict-Transport-Security"):
@@ -687,6 +695,113 @@ def wordpress_remote(base, body, insecure):
     return out
 
 
+JS_SRC = re.compile(rb'<script[^>]*\ssrc=["\']([^"\']+\.js(?:\?[^"\']*)?)["\']', re.I)
+NEXT_JS = re.compile(rb'["\']((?:https?://[^"\'\s<>]+)?(?:/[^"\'\s<>]*)?/_next/static/[^"\'\s<>]+?\.js)["\']')
+NEXT_VER = re.compile(rb'window\.next=\{version:"(\d+\.\d+\.\d+[^"]*)"')
+NEXT_VER_VAR = re.compile(rb'window\.next=\{version:([A-Za-z_$][\w$]*)')
+
+
+def page_scripts(page_url, body):
+    """첫 화면이 불러오는 자바스크립트 주소 — Next.js 조각 파일을 앞에 둔다."""
+    nxt = [urllib.parse.urljoin(page_url, m.decode("utf-8", "replace")) for m in NEXT_JS.findall(body)]
+    rest = [urllib.parse.urljoin(page_url, m.decode("utf-8", "replace")) for m in JS_SRC.findall(body)]
+    # window.next 는 main-app·main 조각이나 이름이 짧은 공용 조각에 들어 있다
+    nxt.sort(key=lambda u: (0 if re.search(r"/main(-app)?-", u) else 1 if re.search(r"/chunks/\d+-", u) else 2, u))
+    seen, out = set(), []
+    for u in nxt + rest:
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out, len(nxt)
+
+
+def next_version(js):
+    m = NEXT_VER.search(js)
+    if m:
+        return m.group(1).decode()
+    m = NEXT_VER_VAR.search(js)  # 페이지 라우터: window.next={version:x} 이고 x="14.2.3" 은 앞쪽에 있다
+    if m:
+        var = re.escape(m.group(1))
+        m2 = re.search(rb"[,;{\s]" + var + rb'="(\d+\.\d+\.\d+[^"]*)"', js)
+        if m2:
+            return m2.group(1).decode()
+    return None
+
+
+def package_vulns(name, ver, ecosystem):
+    """부품 하나의 알려진 취약점 요약. 조회 실패면 None, 없으면 {}."""
+    hits = osv_scan([(name, ver, False)], ecosystem)
+    if hits is None:
+        return None
+    if not hits:
+        return {}
+    ids = hits[0][3][:60]
+    with ThreadPoolExecutor(8) as ex:
+        vs = [v or {"id": i} for i, v in zip(ids, ex.map(lambda i: get_json("https://api.osv.dev/v1/vulns/" + i), ids))]
+    fixes = [f for f in (fixed_version(v, name, ver) for v in vs) if f]
+    return {"count": len(hits[0][3]), "sev": min((vuln_severity(v) for v in vs), key=lambda s: SEV_RANK[s]),
+            "refs": sorted({a for v in vs for a in (v.get("aliases") or []) if a.startswith("CVE-")}) or ids,
+            "fix": max(fixes, key=vtuple) if fixes else None}
+
+
+def nextjs_finding(scripts, insecure):
+    ver, src = None, None
+    for i in range(0, min(len(scripts), 40), 8):
+        batch = scripts[i:i + 8]
+        with ThreadPoolExecutor(8) as ex:
+            got = list(ex.map(lambda u: fetch(u, limit=6 * 1024 * 1024, timeout=15, insecure=insecure), batch))
+        for u, (st, _, js, _) in zip(batch, got):
+            v = next_version(js) if st == 200 else None
+            if v:
+                ver, src = v, u
+                break
+        if ver:
+            break
+    if not ver:
+        return Finding(UNKNOWN, "Next.js 버전을 밖에서 알 수 없습니다",
+                       ["Next.js 로 만든 홈페이지입니다.", "화면 파일에서 버전 표시를 찾지 못했습니다."],
+                       detail=["서버 점검(--server)의 부품 점검에서 Next.js 버전과 보안 문제를 확인할 수 있습니다."])
+    det = ["Next.js %s — 화면 파일 %s 에서 확인" % (ver, src.split("?")[0].rsplit("/", 1)[-1])]
+    info = package_vulns("next", ver, "npm")
+    if info is None:
+        return Finding(UNKNOWN, "Next.js %s — 알려진 보안 문제를 조회하지 못했습니다" % ver,
+                       "취약점 정보(OSV)를 인터넷에서 가져오지 못했습니다.", detail=det)
+    if not info:
+        return Finding(OK, "Next.js %s — 알려진 보안 문제가 없습니다" % ver,
+                       "홈페이지 화면을 만드는 Next.js 버전에 알려진 보안 문제가 없습니다.", detail=det)
+    severe = SEV_RANK[info["sev"]] <= 1
+    det.append("알려진 보안 문제 %d건 · 가장 높은 등급 %s" % (info["count"], SEV_KO[info["sev"]]))
+    det.append(", ".join(info["refs"][:8]) + (" 외 %d건" % (len(info["refs"]) - 8) if len(info["refs"]) > 8 else ""))
+    plain = ["홈페이지 화면을 만드는 Next.js 에 보안 문제가 %d건 알려져 있습니다." % info["count"]]
+    if severe:
+        plain.append("그중에는 심각도가 높은 문제가 있습니다.")
+    plain.append("Next.js 버전은 화면 파일에 적혀 있어서 공격자도 쉽게 알아냅니다.")
+    ask = ("Next.js 를 %s 이상으로 올려 주십시오." % info["fix"]) if info["fix"] else "Next.js 를 최신 버전으로 올려 주십시오."
+    return Finding(DANGER if severe else WARN, "Next.js %s — 알려진 보안 문제가 있는 버전입니다" % ver, plain, ask, det)
+
+
+def sourcemap_finding(scripts, host, insecure):
+    """화면 파일의 원본 소스 코드 지도(.map)가 열리는지. 같은 주소의 파일 여섯 개까지 본다."""
+    mine = [u for u in scripts if urllib.parse.urlsplit(u).hostname == host][:6]
+    if not mine:
+        return None
+
+    def probe(u):
+        st, _, b, _ = fetch(u.split("?")[0] + ".map", follow=False, limit=4096, timeout=10, insecure=insecure)
+        return u.split("?")[0] + ".map" if st == 200 and b'"version":3' in b[:300] and b'"mappings"' in b else None
+
+    with ThreadPoolExecutor(6) as ex:
+        hits = [h for h in ex.map(probe, mine) if h]
+    if not hits:
+        return Finding(OK, "소스 코드 지도 파일이 열리지 않습니다",
+                       "화면 파일의 원본 소스 코드(.map)가 밖에서 열리지 않습니다.", detail=["확인한 파일 %d개" % len(mine)])
+    return Finding(WARN, "소스 코드 지도 파일(.map)이 밖에서 열립니다",
+                   ["화면 파일을 만들기 전의 원본 소스 코드를 누구나 내려받을 수 있습니다.",
+                    "코드 구조와 숨겨 둔 주소, 때로는 비밀 값까지 드러납니다."],
+                   "배포할 때 .map 파일을 빼거나 밖에서 열리지 않게 막아 주십시오 "
+                   "(Next.js: productionBrowserSourceMaps 끄기).", hits[:3])
+
+
 def remote_check(url):
     if "://" not in url:
         url = "https://" + url
@@ -712,6 +827,14 @@ def remote_check(url):
                         detail=[body.decode("utf-8", "replace")[:200]]))
         return rep
 
+    if st in (401, 403, 406, 429, 503):
+        rep.add(Finding(UNKNOWN, "사이트가 점검 요청을 막았습니다",
+                        ["첫 화면이 %d 로 응답했습니다." % st,
+                         "보안 서비스(방화벽)가 자동 점검을 막아서 대부분의 항목을 확인하지 못했습니다."],
+                        detail=["막힌 화면으로는 판단하지 않아서, 인증서와 http 접속만 확인했습니다."]))
+        rep.add(http_redirect_finding(u.hostname))
+        return rep
+
     progress("http 접속 확인")
     rep.add(http_redirect_finding(u.hostname))
     rep.add(header_findings(hd, final))
@@ -723,9 +846,13 @@ def remote_check(url):
         progress("워드프레스 확인")
         rep.add(wordpress_remote(base, body, insecure))
         rep.notes.append("워드프레스 플러그인은 서버 점검(--server)에서 확인합니다.")
-    if b"/_next/static" in body or "Next.js" in " ".join(header_all(hd, "X-Powered-By")):
-        rep.notes.append("Next.js 로 만든 사이트입니다. Next.js 는 최근 심각한 보안 문제가 여러 번 나왔습니다. "
-                         "버전은 서버 점검(--server)으로 확인합니다.")
+    scripts, n_next = page_scripts(final, body)
+    if n_next or "Next.js" in " ".join(header_all(hd, "X-Powered-By")):
+        progress("Next.js 버전 확인")
+        rep.add(nextjs_finding(scripts, insecure))
+        rep.notes.append("Node.js 자체의 버전은 밖에서 알 수 없어 서버 점검(--server)으로 확인합니다.")
+    progress("소스 코드 지도 파일 확인")
+    rep.add(sourcemap_finding(scripts, urllib.parse.urlsplit(final).hostname or u.hostname, insecure))
     return rep
 
 

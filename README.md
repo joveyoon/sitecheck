@@ -26,7 +26,7 @@ PHP·Node.js·워드프레스로 만든 사이트에서 알려진 보안 문제�
 설치하는 것도, 남는 파일도 없어요. 읽기만 하고 설정은 바꾸지 않아요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.4/sitecheck.py | python3 - --server
 ```
 
 - 출력 전체를 사이트 주인께 보내 주세요. 끝에 `--html report.html` 을 붙이면 파일로도 저장돼요.
@@ -34,14 +34,14 @@ curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck
 - 서버 접속 없이 바깥에서만 보려면 Python 이 있는 아무 컴퓨터에서 주소를 넣어요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - https://example.com
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.4/sitecheck.py | python3 - https://example.com
 ```
 
 받은 파일을 확인하고 돌리려면:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py
-sha256sum sitecheck.py   # 048b189611640a7892761614a05cd69c09465ca582820f44c6f6db67fffca77e
+curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.4/sitecheck.py
+sha256sum sitecheck.py   # be6bc4ae04fab39a29fb7ce7ef2891bde564e822c28491de8de5c7ba88b68b48
 python3 sitecheck.py --server
 ```
 
@@ -78,6 +78,10 @@ ssh 계정@서버 'python3 - --server' < sitecheck.py
 | 새면 안 되는 파일 29곳 | `.env`, `.git`, wp-config 백업, SQL·압축 백업, phpinfo, 잠금 파일, 폴더 목록 등 — 내용까지 확인해 오탐을 거른다 |
 | 밖에 보이는 잠금 파일 | `composer.lock`·`package-lock.json` 이 열리면 그 안의 부품 취약점까지 |
 | 워드프레스 | 버전, 관리자 아이디 노출(REST API), xmlrpc.php |
+| Next.js 버전 | 화면 파일의 `window.next={version:…}` 에서 버전을 읽어 OSV 로 알려진 취약점 조회 |
+| 소스 코드 지도 | 같은 주소의 화면 파일 6개까지 `.map` 이 열리는지 |
+| Node.js 서버 이름 | `X-Powered-By: Express`·`Next.js` 등 |
+| 점검 차단 | 첫 화면이 401·403·429·503 이면 막힌 화면으로 판단하지 않고 그렇다고 알린다 |
 
 ### 서버 점검
 | 항목 | 기준 |
@@ -165,7 +169,8 @@ ends with a ready-to-send request letter for the developer.
 - **Outside check** (`sitecheck.py https://example.com`): TLS certificate, HTTP→HTTPS redirect,
   version-leaking headers, missing security headers, 29 commonly exposed files
   (`.env`, `.git`, `wp-config` backups, SQL/zip dumps, phpinfo, lockfiles, directory listing),
-  WordPress version, user enumeration, `xmlrpc.php`.
+  WordPress version, user enumeration, `xmlrpc.php`, Next.js version (from client chunks) against OSV,
+  exposed source maps, Node.js `X-Powered-By` headers.
 - **Server check** (`sitecheck.py --server`): OS end-of-life, pending (security) updates,
   PHP/Node.js end-of-life and missing patch releases, processes still running a binary that was
   upgraded underneath them, risky `php.ini` settings, npm/yarn/pnpm/Composer dependencies against
@@ -174,7 +179,7 @@ ends with a ready-to-send request letter for the developer.
 Single file, Python 3.6+, standard library only. Run it without installing:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.4/sitecheck.py | python3 - --server
 ```
 
 Exit code: `2` if any critical finding, `1` if warnings only, `0` otherwise. MIT licensed.
