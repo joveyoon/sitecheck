@@ -493,10 +493,10 @@ def result_page(token, notice=None):
         mail = "mailto:%s?%s" % (CONTACT, urllib.parse.urlencode(
             {"subject": "%s 보안 점검 조치 문의" % host, "body": "점검 결과: %s\n\n" % link},
             quote_via=urllib.parse.quote))
-        b.append("<div class=fix><b>즉시 조치 가능합니다</b>"
-                 "<p>점검에서 나온 문제를 바로 고쳐 드립니다.</p>"
-                 "<p><a href=\"%s\">%s</a> 로 연락 주십시오.</p>"
-                 "<a class=btn href=\"%s\">메일 보내기</a></div>" % (e(mail), CONTACT, e(mail)))
+        b.append("<div class=fix><b>직접 조치가 어려우신가요?</b>"
+                 "<p>외주 업체와 연락이 닿지 않거나 직접 고치기 어려우시면 도와 드립니다.</p>"
+                 "<p><a href=\"%s\">%s</a> 로 문의해 주십시오.</p>"
+                 "<a class=btn href=\"%s\">메일로 문의하기</a></div>" % (e(mail), CONTACT, e(mail)))
     return page("%s 보안 점검 결과" % host, "".join(b))
 
 
