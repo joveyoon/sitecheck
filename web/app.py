@@ -286,20 +286,6 @@ font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(0
 body{padding-bottom:72px}
 .big{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.5px;color:#fafafa;margin:4px 0 2px}
 .hero{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px}
-.sec{margin:28px 0 10px;font-size:19px;font-weight:700}
-.sec small{display:block;font-size:14px;font-weight:400;color:#a1a1aa;margin-top:2px}
-.pic{display:flex;gap:14px;align-items:flex-start}
-.pic svg{flex:none;width:56px;height:56px}
-.pic h3{font-size:16px;font-weight:700;margin:0 0 4px}
-.pic h3 b{color:#c084fc;margin-right:6px}
-.pic p{margin:0;color:#d4d4d8}
-.pic p+p{margin-top:6px}
-.pic .sub{color:#a1a1aa;font-size:14px}
-.levels{display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:14px;color:#d4d4d8}
-.diagram{display:block;width:100%;height:auto;margin:6px 0 10px}
-details{background:#0f0f0f;border:1px solid #262626;border-radius:12px;padding:12px 16px;margin-bottom:8px}
-summary{cursor:pointer;font-weight:600}
-details p{margin:8px 0 0;color:#d4d4d8}
 """
 
 COPY_JS = """
@@ -331,9 +317,7 @@ def page(title, body, index=False, refresh=None, desc=None):
     return "".join(head) + body + foot + by + "<script>%s</script></main></body></html>" % COPY_JS
 
 
-# 첫 화면 그림 — 인라인 SVG 라 외부 파일·CSP 예외가 필요 없다. 보라 선 그림으로 통일한다.
-_L = 'fill="none" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"'
-
+# 첫 화면 그림 — 인라인 SVG 라 외부 파일·CSP 예외가 필요 없다.
 SVG_HERO = (
     '<svg class=hero viewBox="0 0 320 130" role=img aria-label="집 밖에서 돋보기로 살피는 그림">'
     '<defs><linearGradient id=g x1=0 x2=1><stop offset=0 stop-color="#c084fc"/><stop offset=.5 stop-color="#a78bfa"/>'
@@ -349,69 +333,6 @@ SVG_HERO = (
     '<path d="M214 62 l10 10 l18 -20" fill="none" stroke="#4ade80" stroke-width=5 stroke-linecap=round stroke-linejoin=round />'
     '</svg>')
 
-SVG_STEP = [
-    # 1 주소 넣기 — 브라우저 주소창
-    '<svg viewBox="0 0 64 64"><rect x=6 y=10 width=52 height=44 rx=7 %s/><line x1=6 y1=21 x2=58 y2=21 %s/>'
-    '<rect x=13 y=29 width=38 height=11 rx=5.5 %s/><line x1=42 y1=31 x2=42 y2=38 %s/></svg>' % ((_L,) * 4),
-    # 2 결과 읽기 — 색 표시가 붙은 결과 카드
-    '<svg viewBox="0 0 64 64"><rect x=10 y=6 width=44 height=52 rx=6 %s/>'
-    '<rect x=16 y=15 width=10 height=7 rx=2 fill="#f87171"/><line x1=31 y1=18.5 x2=47 y2=18.5 %s/>'
-    '<rect x=16 y=28 width=10 height=7 rx=2 fill="#fb923c"/><line x1=31 y1=31.5 x2=47 y2=31.5 %s/>'
-    '<rect x=16 y=41 width=10 height=7 rx=2 fill="#4ade80"/><line x1=31 y1=44.5 x2=43 y2=44.5 %s/></svg>' % ((_L,) * 4),
-    # 3 업체에 보내기 — 종이비행기
-    '<svg viewBox="0 0 64 64"><path d="M7 30 L57 9 L45 55 L31 39 Z" %s/><path d="M31 39 L57 9" %s/>'
-    '<path d="M31 39 L29 52 L37 45" %s/></svg>' % ((_L,) * 3),
-    # 4 고쳤는지 확인 — 다시 점검 화살표와 체크
-    '<svg viewBox="0 0 64 64"><path d="M52 32 a20 20 0 1 1 -6 -14.1" %s/><path d="M47 7 v11 h-11" %s/>'
-    '<path d="M22 33 l7 7 l13 -14" fill="none" stroke="#4ade80" stroke-width="3.5" stroke-linecap="round" '
-    'stroke-linejoin="round"/></svg>' % ((_L,) * 2),
-]
-
-SVG_SEE = [
-    # 자물쇠 — 보안 인증서
-    '<svg viewBox="0 0 64 64"><rect x=14 y=28 width=36 height=28 rx=5 %s/><path d="M21 28 v-7 a11 11 0 0 1 22 0 v7" %s/>'
-    '<circle cx=32 cy=41 r=3.5 %s/><line x1=32 y1=44.5 x2=32 y2=49 %s/></svg>' % ((_L,) * 4),
-    # 열린 폴더와 열쇠 — 밖에 놓인 비밀 파일
-    '<svg viewBox="0 0 64 64"><path d="M6 18 h17 l5 6 h30 v28 a4 4 0 0 1 -4 4 h-44 a4 4 0 0 1 -4 -4 z" %s/>'
-    '<circle cx=25 cy=40 r=6 %s/><path d="M31 40 h17 M43 40 v6 M48 40 v4" %s/></svg>' % ((_L,) * 3),
-    # 이름표 — 밖으로 드러난 버전
-    '<svg viewBox="0 0 64 64"><path d="M8 32 L32 8 H56 V32 L32 56 Z" %s/><circle cx=45 cy=19 r=3.5 %s/>'
-    '<path d="M22 34 l5 9 l5 -9 M36 42 h1" %s/></svg>' % ((_L,) * 3),
-    # 문과 별표 비밀번호 — 워드프레스 관리자 출입구
-    '<svg viewBox="0 0 64 64"><rect x=12 y=6 width=28 height=52 rx=2 %s/><circle cx=34 cy=33 r=2 fill="#c084fc"/>'
-    '<path d="M46 22 l10 0 M48 16 l6 12 M54 16 l-6 12 M46 40 l10 0 M48 34 l6 12 M54 34 l-6 12" %s/></svg>' % ((_L,) * 2),
-]
-
-SVG_INOUT = (
-    '<svg class=diagram viewBox="0 0 340 170" role=img aria-label="집 밖과 집 안을 나눈 그림">'
-    '<path d="M150 58 L240 14 L330 58" fill="none" stroke="#a78bfa" stroke-width=3 stroke-linejoin=round />'
-    '<rect x=160 y=58 width=160 height=100 rx=4 fill="#0f0f0f" stroke="#a78bfa" stroke-width=3 />'
-    '<rect x=174 y=72 width=132 height=72 rx=6 fill="none" stroke="#52525b" stroke-width=2 stroke-dasharray="6 5"/>'
-    '<circle cx=214 cy=100 r=11 fill="none" stroke="#a1a1aa" stroke-width=2.5 />'
-    '<circle cx=214 cy=100 r=4 fill="#a1a1aa"/>'
-    '<path d="M214 85 v-4 M214 115 v4 M199 100 h-4 M229 100 h4 M203 89 l-3 -3 M225 111 l3 3 M203 111 l-3 3 M225 89 l3 -3" '
-    'stroke="#a1a1aa" stroke-width=2.5 stroke-linecap=round />'
-    '<rect x=248 y=88 width=40 height=26 rx=3 fill="none" stroke="#a1a1aa" stroke-width=2.5 />'
-    '<path d="M256 96 h24 M256 104 h16" stroke="#a1a1aa" stroke-width=2.5 stroke-linecap=round />'
-    '<text x=240 y=137 text-anchor=middle fill="#a1a1aa" font-size=14>집 안 — 업체가 점검</text>'
-    '<circle cx=62 cy=90 r=26 fill="rgba(192,132,252,.08)" stroke="#c084fc" stroke-width=4 />'
-    '<line x1=80 y1=108 x2=104 y2=132 stroke="#c084fc" stroke-width=7 stroke-linecap=round />'
-    '<path d="M48 90 l9 9 l16 -18" fill="none" stroke="#4ade80" stroke-width=4 stroke-linecap=round stroke-linejoin=round />'
-    '<text x=62 y=162 text-anchor=middle fill="#c084fc" font-size=15>집 밖 — 이 점검</text>'
-    '</svg>')
-
-
-def ps(*sentences, cls=None):
-    """한 줄에 한 문장 — 문장마다 <p> 하나."""
-    attr = " class=%s" % cls if cls else ""
-    return "".join("<p%s>%s</p>" % (attr, s) for s in sentences)
-
-
-def pic(svg, title, *sentences, num=None, sub=None, extra=""):
-    head = ("<b>%s</b>" % num if num else "") + title
-    body = ps(*sentences) + (ps(*sub, cls="sub") if sub else "") + extra
-    return "<div class='box pic'>%s<div><h3>%s</h3>%s</div></div>" % (svg, head, body)
-
 
 def home_page(error=None, url=""):
     b = ["<div class=big>PHP · Node.js</div>",
@@ -425,78 +346,6 @@ def home_page(error=None, url=""):
              'autocomplete=url inputmode=url aria-label="사이트 주소">'
              "<button>점검하기</button></form>" % (PREFIX, e(url)))
     b.append("<p class=agree>본인이 운영하거나 관리를 맡은 홈페이지만 점검해 주십시오.</p>")
-
-    b.append("<h2 class=sec>이 점검은 무엇입니까<small>홈페이지를 집에 비유하면 이렇습니다.</small></h2>")
-    b.append("<div class=box>" + ps(
-        "홈페이지는 인터넷 위에 지어 놓은 집과 같습니다.",
-        "이 점검은 집 밖을 한 바퀴 돌면서 문이 열려 있지 않은지, 열쇠가 현관 앞에 놓여 있지 않은지 살펴보는 일입니다.",
-        "누구나 지나가며 볼 수 있는 곳만 둘러봅니다.",
-        "홈페이지에 아무것도 바꾸거나 지우지 않으니 안심하셔도 됩니다.") + "</div>")
-
-    b.append("<h2 class=sec>사용 방법<small>네 단계면 끝납니다.</small></h2>")
-    b.append(pic(SVG_STEP[0], "주소를 넣습니다",
-                 "위 칸에 내 홈페이지 주소를 넣고 「점검하기」를 누릅니다.",
-                 "30초쯤 기다리면 결과 화면이 나옵니다.",
-                 num=1, sub=["주소는 브라우저 맨 위 주소창에 보이는 것을 그대로 복사하면 됩니다."]))
-    b.append(pic(SVG_STEP[1], "결과를 읽습니다",
-                 "찾은 내용이 세 가지 색으로 나뉘어 나옵니다.",
-                 num=2, extra="<div class=levels>"
-                 "<div><span class='lv lv-위험'>위험</span>바로 고쳐야 합니다.</div>"
-                 "<div><span class='lv lv-주의'>주의</span>급하지 않지만 고치는 편이 좋습니다.</div>"
-                 "<div><span class='lv lv-문제없음'>문제없음</span>그대로 두셔도 됩니다.</div>"
-                 "</div>"))
-    b.append(pic(SVG_STEP[2], "업체에 보냅니다",
-                 "결과 화면의 「요청문 복사」를 눌러, 홈페이지를 만든 업체에 문자·메신저·이메일로 보냅니다.",
-                 "요청문에 무엇을 왜 고쳐야 하는지가 다 적혀 있습니다.",
-                 "어려운 말을 따로 설명하실 필요가 없습니다.",
-                 num=3))
-    b.append(pic(SVG_STEP[3], "고쳤는지 확인합니다",
-                 "업체가 다 고쳤다고 하면 같은 결과 링크를 열고 「다시 점검」을 누릅니다.",
-                 "고친 항목은 「고쳐진 항목」에 따로 표시됩니다.",
-                 "말로만 듣지 않고 눈으로 확인하실 수 있습니다.",
-                 num=4))
-
-    b.append("<h2 class=sec>무엇을 봅니까<small>홈페이지가 뚫리는 흔한 길 네 가지를 봅니다.</small></h2>")
-    b.append(pic(SVG_SEE[0], "주소창의 자물쇠 (보안 인증서)",
-                 "주소창 왼쪽의 자물쇠 표시가 제대로 있는지 봅니다.",
-                 "자물쇠는 방문자가 입력한 이름·연락처 같은 내용을 남이 엿보지 못하게 감싸 줍니다.",
-                 sub=["기한이 지나면 방문자 화면에 '안전하지 않음' 경고가 떠서 손님이 돌아갑니다."]))
-    b.append(pic(SVG_SEE[1], "밖에 놓인 비밀 파일",
-                 "홈페이지를 만들 때 쓰던 비밀번호 메모나 백업 파일이 누구나 열 수 있는 곳에 남아 있는지 29곳을 확인합니다.",
-                 "현관 앞에 열쇠를 두고 나간 것과 같아서, 발견되면 가장 먼저 고쳐야 합니다."))
-    b.append(pic(SVG_SEE[2], "밖으로 드러난 프로그램 정보",
-                 "홈페이지가 어떤 프로그램의 몇 번째 버전으로 돌아가는지 밖에 적혀 있는지 봅니다.",
-                 "도둑에게 '우리 집 자물쇠는 ○○회사 몇 년식'이라고 알려 주는 것과 같습니다.",
-                 sub=["다른 사이트가 내 홈페이지를 몰래 겹쳐 띄우지 못하게 하는 보호 설정도 함께 봅니다."]))
-    b.append(pic(SVG_SEE[3], "워드프레스 관리자 출입문",
-                 "워드프레스로 만든 홈페이지라면 프로그램이 최신인지 봅니다.",
-                 "관리자 아이디가 밖에 보이는지, 비밀번호를 수백 번씩 넣어 볼 수 있는 문이 열려 있는지도 봅니다.",
-                 sub=["워드프레스는 전 세계에서 가장 많이 쓰여서 공격도 가장 많이 받습니다."]))
-
-    b.append("<h2 class=sec>밖에서는 보이지 않는 것<small>그래서 업체에 안쪽 점검을 함께 부탁합니다.</small></h2>")
-    b.append("<div class=box>" + SVG_INOUT + ps(
-        "이 점검은 집 밖에서 보는 점검입니다.",
-        "집 안의 배선이나 보일러처럼, 서버 안에서 도는 프로그램의 버전과 홈페이지를 만들 때 쓴 부품은 밖에서 보이지 않습니다.",
-        "그래서 요청문에 '서버 안쪽도 점검해 주십시오'라는 부탁과, 업체가 그대로 실행하면 되는 명령을 함께 넣어 드립니다.",
-        "업체가 그 결과를 보내 주면 안쪽까지 확인하실 수 있습니다.") + "</div>")
-
-    b.append("<h2 class=sec>자주 묻는 질문</h2>")
-    faq = [
-        ("점검하면 홈페이지가 느려지거나 망가지지 않습니까?",
-         ["그렇지 않습니다.", "방문자 한 명이 페이지 마흔 개쯤을 열어 보는 정도입니다.", "아무것도 바꾸거나 지우지 않습니다."]),
-        ("결과 링크는 누가 볼 수 있습니까?",
-         ["링크를 아는 사람은 누구나 볼 수 있습니다.", "홈페이지의 약점이 적혀 있으니 외주 업체에만 보내 주십시오.",
-          "결과 화면은 검색 사이트에 나오지 않습니다."]),
-        ("문제가 하나도 없으면 안전한 것입니까?",
-         ["밖에서 보이는 흔한 문제가 없다는 뜻입니다.", "서버 안쪽까지 안전한지는 요청문의 서버 점검 결과로 확인하셔야 합니다."]),
-        ("다른 사람의 홈페이지도 점검할 수 있습니까?",
-         ["본인이 운영하거나 관리를 맡은 홈페이지만 점검해 주십시오."]),
-        ("비용이 듭니까?", ["무료입니다."]),
-        ("궁금한 점은 어디에 물어봅니까?", ["help@etfindex.co.kr 로 메일을 보내 주십시오."]),
-    ]
-    for q, a in faq:
-        b.append("<details><summary>%s</summary>%s</details>" % (q, ps(*a)))
-
     return page("PHP·Node.js 홈페이지 보안 점검 — 주소만 넣으면 됩니다 | sitecheck", "".join(b), index=True,
                 desc="PHP·Node.js·워드프레스 홈페이지의 보안 문제를 서버에 들어가지 않고 주소만으로 찾고, "
                      "외주 업체에 보낼 요청문까지 만들어 드립니다. IT 지식이 없어도 쓸 수 있습니다.")
