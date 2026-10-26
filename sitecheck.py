@@ -28,7 +28,7 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 UA = "sitecheck/" + VERSION
 HOME = "https://github.com/joveyoon/sitecheck"
 CREDIT = "sitecheck 로 점검했어요 · " + HOME
@@ -1160,21 +1160,27 @@ def server_check(extra):
 
 # ─── 출력 ────────────────────────────────────────────────────────────
 
-def letter_lines(reports):
-    todo = [(r, f) for r in reports for f in r.sorted() if f.level in (DANGER, WARN) and f.ask]
-    if not todo:
-        return []
-    L = ["안녕하세요.",
-         "%s 보안 점검에서 아래 항목이 나왔어요." % ", ".join(r.target for r in reports),
-         "확인하고 조치해 주세요.", ""]
-    for i, (_, f) in enumerate(todo, 1):
+def letter_items(reports):
+    """요청문 본문 — 고칠 항목마다 제목·요청·근거. 고칠 것이 없으면 []."""
+    todo = [f for r in reports for f in r.sorted() if f.level in (DANGER, WARN) and f.ask]
+    L = []
+    for i, f in enumerate(todo, 1):
         L.append("%d. [%s] %s" % (i, f.level, f.title))
         L.append("   요청: " + f.ask)
         for j, d in enumerate(f.detail):
             L.append(("   근거: " if j == 0 else "         ") + d)
         L.append("")
-    L += ["조치가 끝나면 알려 주세요.", "같은 점검을 다시 돌려 확인할게요.", "", CREDIT]
     return L
+
+
+def letter_lines(reports):
+    items = letter_items(reports)
+    if not items:
+        return []
+    return (["안녕하세요.",
+             "%s 보안 점검에서 아래 항목이 나왔어요." % ", ".join(r.target for r in reports),
+             "확인하고 조치해 주세요.", ""] + items +
+            ["조치가 끝나면 알려 주세요.", "같은 점검을 다시 돌려 확인할게요.", "", CREDIT])
 
 
 def render_text(reports):
