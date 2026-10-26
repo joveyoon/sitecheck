@@ -7,17 +7,18 @@ PHP·Node.js·워드프레스로 만든 사이트에서 알려진 보안 문제�
 
 ## 사이트 주인이시라면
 
-이 페이지 주소를 사이트를 만든 외주 업체에 보내 주세요.
-아래 문장을 그대로 붙여 보내면 돼요.
+서버에 들어가지 않아도 돼요.
+**https://etfindex.co.kr/sitecheck/** 에서 사이트 주소만 넣으세요.
 
-> https://github.com/joveyoon/sitecheck 의 「외주 업체·개발자시라면」 명령을 우리 사이트 서버에서 돌리고, 결과를 그대로 보내 주세요.
+1. 점검이 끝나면 결과 화면에 요청문과 결과 링크가 나와요.
+2. 「요청문 복사」를 눌러 외주 업체에 보내 주세요. 서버 안쪽 점검 요청도 함께 들어 있어요.
+3. 업체가 고친 뒤 같은 링크에서 「다시 점검」을 누르면, 고쳐진 항목이 따로 보여요.
 
-결과를 받으면 이렇게 읽어요.
+결과는 이렇게 읽어요.
 
 - 맨 위 한 줄이 요약이에요. 「바로 고쳐야 할 문제가 2개 있어요」처럼 나와요.
 - **위험**은 바로 고쳐야 할 것이에요. **주의**는 고치면 좋은 것이에요.
-- 맨 끝 「외주 업체에 보낼 요청문」이 외주 업체가 할 일이에요. 그대로 다시 보내면 돼요.
-- 조치가 끝나면 같은 점검을 한 번 더 돌려 달라고 하세요. 항목이 사라졌으면 고친 거예요.
+- 결과 링크를 아는 사람은 누구나 결과를 볼 수 있어요. 외주 업체에만 보내 주세요.
 
 ## 외주 업체·개발자시라면
 
@@ -25,7 +26,7 @@ PHP·Node.js·워드프레스로 만든 사이트에서 알려진 보안 문제�
 설치하는 것도, 남는 파일도 없어요. 읽기만 하고 설정은 바꾸지 않아요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - --server
 ```
 
 - 출력 전체를 사이트 주인께 보내 주세요. 끝에 `--html report.html` 을 붙이면 파일로도 저장돼요.
@@ -33,14 +34,14 @@ curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck
 - 서버 접속 없이 바깥에서만 보려면 Python 이 있는 아무 컴퓨터에서 주소를 넣어요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - https://example.com
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - https://example.com
 ```
 
 받은 파일을 확인하고 돌리려면:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py
-sha256sum sitecheck.py   # e4900132c923ab854a2e5c18bba2b5894250a2115b82817aac9d275d1d69491c
+curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py
+sha256sum sitecheck.py   # 826aaf055b25b41374893c47781b700608fccdd0acae250ce90f985ecb4a7ee4
 python3 sitecheck.py --server
 ```
 
@@ -104,10 +105,42 @@ ssh 계정@서버 'python3 - --server' < sitecheck.py
 - Node.js 는 nodejs.org 의 `security` 표시가 붙은 릴리스가 뒤에 나왔는가
 - PHP·워드프레스는 그 계열이 보안 수정만 나오는 시기(endoflife.date `support` 종료)인데 뒤에 패치가 나왔는가
 
+## 웹 버전 직접 띄우기
+
+`web/app.py` 가 https://etfindex.co.kr/sitecheck/ 의 웹 버전이다. 역시 표준 라이브러리만 쓴다 (Python 3.7+).
+
+```bash
+SITECHECK_PUBLIC=https://example.com/sitecheck python3 web/app.py   # 127.0.0.1:8130
+```
+
+| 환경 변수 | 기본값 | |
+|---|---|---|
+| `SITECHECK_PORT` | `8130` | 127.0.0.1 에서만 듣는다 |
+| `SITECHECK_PUBLIC` | `http://127.0.0.1:8130` | 밖에서 보이는 주소. 요청문 링크·화면 링크에 쓴다 |
+| `SITECHECK_DB` | `web/sitecheck.db` | 결과 저장 (SQLite) |
+
+nginx:
+
+```nginx
+location = /sitecheck { return 301 /sitecheck/; }
+location ^~ /sitecheck/ {
+    proxy_pass http://127.0.0.1:8130/;
+    proxy_set_header X-Real-IP $remote_addr;
+    client_max_body_size 8k;
+}
+```
+
+남의 사이트를 대신 찾아가는 서비스라 아래를 지킨다.
+- 공개 인터넷 주소에만 접속한다. `socket.getaddrinfo` 를 감싸 사설·루프백·링크 로컬 주소를 걸러 내므로 리다이렉트로도 내부망에 닿지 않는다
+- 80·443 포트만 받는다
+- IP 하나당 시간에 10번, 같은 사이트는 1분에 한 번, 대기열 20
+- 결과 화면은 `noindex` — 남의 사이트 약점이 검색에 걸리지 않게 한다
+
 ## 어디로 무엇을 보내나요
 
 점검 결과는 화면(과 `--html` 파일)에만 남아요. 어디에도 올리지 않아요.
 서버 주소·파일 내용·비밀번호·설정 값은 밖으로 나가지 않아요.
+웹 버전은 예외예요 — 결과 링크와 「다시 점검」을 위해 바깥 점검 결과를 웹 서버에 저장해요.
 
 밖으로 나가는 요청은 아래가 전부예요. 모든 요청에 `User-Agent: sitecheck/버전` 이 붙어요.
 
@@ -141,7 +174,7 @@ ends with a ready-to-send request letter for the developer.
 Single file, Python 3.6+, standard library only. Run it without installing:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - --server
 ```
 
 Exit code: `2` if any critical finding, `1` if warnings only, `0` otherwise. MIT licensed.

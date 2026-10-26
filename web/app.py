@@ -85,9 +85,13 @@ def normalize(url):
     except UnicodeError:
         raise ValueError("주소를 알아보지 못했어요.")
     try:
+        _getaddrinfo(host, 443)
+    except OSError:
+        raise ValueError("이 주소를 인터넷에서 찾을 수 없어요. 주소가 맞는지 확인해 주세요.")
+    try:
         socket.getaddrinfo(host, 443)
     except OSError:
-        raise ValueError("이 주소는 점검할 수 없어요. 인터넷에 공개된 사이트 주소인지 확인해 주세요.")
+        raise ValueError("이 주소는 점검할 수 없어요. 인터넷에 공개된 사이트 주소만 점검해요.")
     return "%s://%s" % (u.scheme, host if port is None else "%s:%d" % (host, port))
 
 
