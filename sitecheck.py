@@ -28,8 +28,10 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 UA = "sitecheck/" + VERSION
+HOME = "https://github.com/joveyoon/sitecheck"
+CREDIT = "sitecheck 로 점검했어요 · " + HOME
 TODAY = datetime.date.today()
 
 DANGER, WARN, UNKNOWN, OK = "위험", "주의", "확인 못 함", "문제없음"
@@ -1171,7 +1173,7 @@ def letter_lines(reports):
         for j, d in enumerate(f.detail):
             L.append(("   근거: " if j == 0 else "         ") + d)
         L.append("")
-    L += ["조치가 끝나면 알려 주세요.", "같은 점검을 다시 돌려 확인할게요."]
+    L += ["조치가 끝나면 알려 주세요.", "같은 점검을 다시 돌려 확인할게요.", "", CREDIT]
     return L
 
 
@@ -1192,6 +1194,8 @@ def render_text(reports):
     letter = letter_lines(reports)
     if letter:
         L += ["-" * 64, " 외주 업체에 보낼 요청문 — 아래를 그대로 복사해 보내세요", "-" * 64, ""] + letter
+    else:
+        L.append(CREDIT)
     return "\n".join(L) + "\n"
 
 
@@ -1239,6 +1243,7 @@ def render_html(reports):
     if letter:
         P.append("<h1>외주 업체에 보낼 요청문</h1><div class=meta>그대로 복사해 보내세요.</div>")
         P.append("<textarea readonly>%s</textarea>" % e("\n".join(letter)))
+    P.append('<div class=notes>sitecheck %s 로 점검했어요 · <a href="%s">%s</a></div>' % (VERSION, HOME, HOME))
     P.append("</main></body></html>")
     return "".join(P)
 

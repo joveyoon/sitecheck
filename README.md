@@ -25,7 +25,7 @@ PHP·Node.js·워드프레스로 만든 사이트에서 알려진 보안 문제�
 설치하는 것도, 남는 파일도 없어요. 읽기만 하고 설정은 바꾸지 않아요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.0/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - --server
 ```
 
 - 출력 전체를 사이트 주인께 보내 주세요. 끝에 `--html report.html` 을 붙이면 파일로도 저장돼요.
@@ -33,14 +33,14 @@ curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.0/sitecheck
 - 서버 접속 없이 바깥에서만 보려면 Python 이 있는 아무 컴퓨터에서 주소를 넣어요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.0/sitecheck.py | python3 - https://example.com
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - https://example.com
 ```
 
 받은 파일을 확인하고 돌리려면:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.0/sitecheck.py
-sha256sum sitecheck.py   # 7c5a0fc3baf810802c12ece214c61a2ed00ff99506df9f14ea16e40c9da303e4
+curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py
+sha256sum sitecheck.py   # e4900132c923ab854a2e5c18bba2b5894250a2115b82817aac9d275d1d69491c
 python3 sitecheck.py --server
 ```
 
@@ -104,15 +104,44 @@ ssh 계정@서버 'python3 - --server' < sitecheck.py
 - Node.js 는 nodejs.org 의 `security` 표시가 붙은 릴리스가 뒤에 나왔는가
 - PHP·워드프레스는 그 계열이 보안 수정만 나오는 시기(endoflife.date `support` 종료)인데 뒤에 패치가 나왔는가
 
-## 쓰는 정보
+## 어디로 무엇을 보내나요
 
-| 출처 | 용도 |
-|---|---|
-| [endoflife.date](https://endoflife.date) | 운영체제·PHP·Node.js·워드프레스 지원 기간과 계열별 최신 버전 |
-| nodejs.org/dist/index.json | Node.js 보안 릴리스 |
-| [OSV](https://osv.dev) | npm·Packagist 부품 취약점 |
-| api.wordpress.org | 플러그인 최신 버전·배포 중단 |
+점검 결과는 화면(과 `--html` 파일)에만 남아요. 어디에도 올리지 않아요.
+서버 주소·파일 내용·비밀번호·설정 값은 밖으로 나가지 않아요.
+
+밖으로 나가는 요청은 아래가 전부예요. 모든 요청에 `User-Agent: sitecheck/버전` 이 붙어요.
+
+| 받는 곳 | 보내는 것 | 왜 |
+|---|---|---|
+| 점검할 사이트 (바깥 점검만) | 첫 화면과 정해진 경로 40곳 안쪽에 GET 요청 | 인증서·헤더·새는 파일 확인 |
+| [endoflife.date](https://endoflife.date) | 제품 이름 (`php`, `nodejs`, `wordpress`, `ubuntu` 등) | 지원 기간과 계열별 최신 버전 |
+| nodejs.org/dist/index.json | 없음 (목록을 받기만 해요) | Node.js 보안 릴리스 |
+| [OSV](https://osv.dev) | 부품 이름과 버전 (예: `next 14.2.33`) | npm·Packagist 부품 취약점 |
+| api.wordpress.org | 플러그인 폴더 이름 (예: `akismet`) | 플러그인 최신 버전·배포 중단 |
 
 ## 보지 않는 것
 
 컨테이너 내부, 방화벽·열린 포트, 사이트 코드 자체의 버그, wordpress.org 에 없는 유료 플러그인.
+
+## English
+
+**sitecheck** is a zero-dependency security checker for websites built by outsourced developers
+(PHP, Node.js, WordPress). It writes the report in plain Korean for non-technical site owners and
+ends with a ready-to-send request letter for the developer.
+
+- **Outside check** (`sitecheck.py https://example.com`): TLS certificate, HTTP→HTTPS redirect,
+  version-leaking headers, missing security headers, 29 commonly exposed files
+  (`.env`, `.git`, `wp-config` backups, SQL/zip dumps, phpinfo, lockfiles, directory listing),
+  WordPress version, user enumeration, `xmlrpc.php`.
+- **Server check** (`sitecheck.py --server`): OS end-of-life, pending (security) updates,
+  PHP/Node.js end-of-life and missing patch releases, processes still running a binary that was
+  upgraded underneath them, risky `php.ini` settings, npm/yarn/pnpm/Composer dependencies against
+  [OSV](https://osv.dev), outdated or closed WordPress plugins. Read-only.
+
+Single file, Python 3.6+, standard library only. Run it without installing:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.1/sitecheck.py | python3 - --server
+```
+
+Exit code: `2` if any critical finding, `1` if warnings only, `0` otherwise. MIT licensed.
