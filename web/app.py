@@ -284,6 +284,14 @@ font-size:13px;font-weight:600;text-decoration:none;box-shadow:0 4px 16px rgba(0
 .by:hover{background:rgba(147,51,234,.25)}
 .by i{width:8px;height:8px;border-radius:50%;background:#c084fc}
 body{padding-bottom:72px}
+.checks{list-style:none;counter-reset:c;padding:0!important;margin:0}
+.checks li{counter-increment:c;position:relative;padding:10px 0 10px 36px;border-top:1px solid #262626}
+.checks li:first-child{border-top:0;padding-top:4px}
+.checks li::before{content:counter(c);position:absolute;left:0;top:10px;width:24px;height:24px;border-radius:50%;
+background:rgba(192,132,252,.15);color:#c084fc;font-size:13px;font-weight:700;text-align:center;line-height:24px}
+.checks li:first-child::before{top:4px}
+.checks b{display:block;color:#fafafa;font-size:15px}
+.checks span{display:block;color:#a1a1aa;font-size:14px;margin-top:2px}
 .big{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.5px;color:#fafafa;margin:4px 0 2px}
 .hero{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px}
 """
@@ -334,6 +342,20 @@ SVG_HERO = (
     '</svg>')
 
 
+# 첫 화면 「점검 항목」 — sitecheck.remote_check 가 실제로 보는 것과 맞춘다
+CHECKS = [
+    ("보안 인증서", "주소창의 자물쇠(https)가 정상인지, 만료가 다가오지 않았는지 봅니다."),
+    ("암호화 주소로 넘기기", "주소를 http 로 쳐도 암호화된 https 화면으로 넘어가는지 봅니다."),
+    ("비밀 파일 노출", "비밀번호가 든 설정 파일, 소스 코드 저장소, 데이터베이스·압축 백업 등 "
+                   "밖에서 열리면 안 되는 파일 29곳이 열리는지 봅니다."),
+    ("프로그램 버전 노출", "서버와 PHP 의 버전이 밖으로 드러나는지, 드러난 PHP 가 지원이 끝났거나 "
+                      "보안 패치가 밀린 버전인지 봅니다."),
+    ("브라우저 보호 설정", "다른 사이트가 몰래 겹쳐 띄우기, 파일 종류 속이기 같은 흔한 공격을 막는 설정이 있는지 봅니다."),
+    ("워드프레스", "워드프레스로 만든 홈페이지라면 최신 버전인지, 관리자 아이디가 보이는지, "
+               "비밀번호를 대량으로 넣어 볼 수 있는 통로가 열려 있는지 봅니다."),
+]
+
+
 def home_page(error=None, url=""):
     b = ["<div class=big>PHP · Node.js</div>",
          "<h1><span class=grad>홈페이지 보안 점검</span></h1>", SVG_HERO,
@@ -346,6 +368,10 @@ def home_page(error=None, url=""):
              'autocomplete=url inputmode=url aria-label="사이트 주소">'
              "<button>점검하기</button></form>" % (PREFIX, e(url)))
     b.append("<p class=agree>본인이 운영하거나 관리를 맡은 홈페이지만 점검해 주십시오.</p>")
+    b.append("<div class=box style='margin-top:24px'><h2>점검 항목</h2><ol class=checks>%s</ol>"
+             "<p class=note>서버 안쪽(PHP·Node.js 버전, 홈페이지를 만들 때 쓴 부품의 보안 문제)은 밖에서 보이지 않습니다.<br>"
+             "그래서 결과의 요청문에 업체가 서버에서 돌릴 점검 명령을 함께 넣어 드립니다.</p></div>"
+             % "".join("<li><b>%s</b><span>%s</span></li>" % (t, d) for t, d in CHECKS))
     return page("PHP·Node.js 홈페이지 보안 점검 — 주소만 넣으면 됩니다 | sitecheck", "".join(b), index=True,
                 desc="PHP·Node.js·워드프레스 홈페이지의 보안 문제를 서버에 들어가지 않고 주소만으로 찾고, "
                      "외주 업체에 보낼 요청문까지 만들어 드립니다. IT 지식이 없어도 쓸 수 있습니다.")
