@@ -292,6 +292,14 @@ background:rgba(192,132,252,.15);color:#c084fc;font-size:13px;font-weight:700;te
 .checks li:first-child::before{top:4px}
 .checks b{display:block;color:#fafafa;font-size:15px}
 .checks span{display:block;color:#a1a1aa;font-size:14px;margin-top:2px}
+.fix{margin:20px 0 8px;padding:20px;border-radius:16px;border:1px solid #c084fc;
+background:linear-gradient(135deg,rgba(147,51,234,.22),rgba(129,140,248,.12))}
+.fix b{display:block;font-size:20px;font-weight:800;color:#fafafa;margin-bottom:6px}
+.fix p{margin:0;color:#e4e4e7}
+.fix p a{color:#e9d5ff;font-weight:600}
+.fix .btn{display:inline-block;margin-top:12px;padding:10px 18px;border-radius:8px;background:#9333ea;color:#fff;
+font-weight:600;text-decoration:none}
+.fix .btn:hover{background:#a855f7}
 .big{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.5px;color:#fafafa;margin:4px 0 2px}
 .hero{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px}
 """
@@ -480,6 +488,15 @@ def result_page(token, notice=None):
 
     notes = rep.notes + ["이 링크를 아는 사람은 누구나 이 결과를 볼 수 있습니다. 외주 업체에만 보내 주십시오."]
     b.append("<div class=notes>%s</div>" % "<br>".join(e(n) for n in notes))
+
+    if rep.count(sc.DANGER) or rep.count(sc.WARN):
+        mail = "mailto:%s?%s" % (CONTACT, urllib.parse.urlencode(
+            {"subject": "%s 보안 점검 조치 문의" % host, "body": "점검 결과: %s\n\n" % link},
+            quote_via=urllib.parse.quote))
+        b.append("<div class=fix><b>즉시 조치 가능합니다</b>"
+                 "<p>점검에서 나온 문제를 바로 고쳐 드립니다.</p>"
+                 "<p><a href=\"%s\">%s</a> 로 연락 주십시오.</p>"
+                 "<a class=btn href=\"%s\">메일 보내기</a></div>" % (e(mail), CONTACT, e(mail)))
     return page("%s 보안 점검 결과" % host, "".join(b))
 
 
