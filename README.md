@@ -26,7 +26,7 @@ PHP·Node.js·워드프레스로 만든 사이트에서 알려진 보안 문제�
 설치하는 것도, 남는 파일도 없어요. 읽기만 하고 설정은 바꾸지 않아요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - --server
 ```
 
 - 출력 전체를 사이트 주인께 보내 주세요. 끝에 `--html report.html` 을 붙이면 파일로도 저장돼요.
@@ -34,14 +34,14 @@ curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck
 - 서버 접속 없이 바깥에서만 보려면 Python 이 있는 아무 컴퓨터에서 주소를 넣어요.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - https://example.com
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - https://example.com
 ```
 
 받은 파일을 확인하고 돌리려면:
 
 ```bash
-curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py
-sha256sum sitecheck.py   # 826aaf055b25b41374893c47781b700608fccdd0acae250ce90f985ecb4a7ee4
+curl -fsSLO https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py
+sha256sum sitecheck.py   # 048b189611640a7892761614a05cd69c09465ca582820f44c6f6db67fffca77e
 python3 sitecheck.py --server
 ```
 
@@ -174,7 +174,7 @@ ends with a ready-to-send request letter for the developer.
 Single file, Python 3.6+, standard library only. Run it without installing:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.2/sitecheck.py | python3 - --server
+curl -fsSL https://raw.githubusercontent.com/joveyoon/sitecheck/v0.1.3/sitecheck.py | python3 - --server
 ```
 
 Exit code: `2` if any critical finding, `1` if warnings only, `0` otherwise. MIT licensed.
