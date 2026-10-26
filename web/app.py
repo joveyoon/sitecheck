@@ -300,6 +300,7 @@ background:linear-gradient(135deg,rgba(147,51,234,.22),rgba(129,140,248,.12))}
 .fix .btn{display:inline-block;margin-top:12px;padding:10px 18px;border-radius:8px;background:#9333ea;color:#fff;
 font-weight:600;text-decoration:none}
 .fix .btn:hover{background:#a855f7}
+.what{font-size:18px;font-weight:600;color:#d4d4d8;margin:-2px 0 4px}
 .big{font-size:40px;font-weight:800;line-height:1.15;letter-spacing:-.5px;color:#fafafa;margin:4px 0 2px}
 .hero{display:block;width:100%;max-width:420px;height:auto;margin:4px auto 8px}
 """
@@ -368,7 +369,8 @@ CHECKS = [
 
 def home_page(error=None, url=""):
     b = ["<div class=big>PHP · Node.js</div>",
-         "<h1><span class=grad>홈페이지 보안 점검</span></h1>", SVG_HERO,
+         "<h1><span class=grad>홈페이지 보안 점검</span></h1>",
+         "<h2 class=what>외부에서 보이는 보안 취약점 점검</h2>", SVG_HERO,
          "<p class=lead>사이트 보안 구멍을 점검합니다.</p>",
          "<p class=lead>홈페이지 주소만 있으면 됩니다. 서버 접속 정보나 비밀번호는 필요 없습니다.</p>",
          "<p class=lead>외주사에 패치를 요청하세요.</p>"]
